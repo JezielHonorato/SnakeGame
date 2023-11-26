@@ -4,8 +4,10 @@ import random
 pygame.init()
 pygame.display.set_caption("SnakeGame")
 
-largura, altura = 1200, 800
+largura, altura = 600, 600
 tela = pygame.display.set_mode((largura, altura))
+fundo = pygame.image.load('./image/background.jpg')
+
 ticks = pygame.time.Clock()
 
 #* cores RGB e Músicas
@@ -74,6 +76,7 @@ posicao_comida_x, posicao_comida_y = gerar_comida()
 
 while True:
     tela.fill(cor_fundo)
+    tela.blit(fundo, (0, 0))
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
             exit()
