@@ -8,99 +8,95 @@ largura, altura = 1200, 800
 tela = pygame.display.set_mode((largura, altura))
 ticks = pygame.time.Clock()
 
-# cores RGB
+#* cores RGB
 
 preta = (0, 0, 0)
 branca = (255, 255, 255)
 vermelha = (255, 0, 0)
 verde = (0, 255, 0)
 
-# parametros da cobrinha
+#* parametros da cobrinha
 
-tamanho_quadrado = 20
-velocidade_jogo = 15
+pixel = 20 # Tamanho de cada pixel no jogo, a cobra e a comida.
+velocidade_jogo = 10
 
 def gerar_comida():
-    comida_x = round(random.randrange(0, largura - tamanho_quadrado) / float(tamanho_quadrado)) * float(tamanho_quadrado)
-    comida_y = round(random.randrange(0, altura - tamanho_quadrado) / float(tamanho_quadrado)) * float(tamanho_quadrado)
-    return comida_x, comida_y
+    posicao_comida_x = round(random.randrange(0, largura - pixel) / float(pixel)) * float(pixel) # Caber direito na tabela
+    posicao_comida_y = round(random.randrange(0, altura - pixel) / float(pixel)) * float(pixel)
+    return posicao_comida_x, posicao_comida_y
 
-def desenhar_comida(tamanho, comida_x, comida_y):
-    pygame.draw.rect(tela, verde, [comida_x, comida_y, tamanho, tamanho])
+def desenhar_comida(pixel, posicao_comida_x, posicao_comida_y):
+    pygame.draw.rect(tela, verde, [posicao_comida_x, posicao_comida_y, pixel, pixel])
 
-def desenhar_cobra(tamanho, pixels):
-    for pixel in pixels:
-        pygame.draw.rect(tela, branca, [pixel[0], pixel[1], tamanho, tamanho])
+def desenhar_cobra(pixel, tamanho_cobra):
+    for item in tamanho_cobra: 
+        pygame.draw.rect(tela, branca, [item[0], item[1], pixel, pixel])
 
-def desenhar_pontuacao(pontuacao):
+def desenhar_pontuacao(pontos):
     fonte = pygame.font.SysFont("Helvetica", 35)
-    texto = fonte.render(f"Pontos: {pontuacao}", True, vermelha)
+    texto = fonte.render(f"Pontos: {pontos}", True, vermelha)
     tela.blit(texto, [1, 1])
 
-def selecionar_velocidade(tecla):
+def mover_personagem(tecla):
     if tecla == pygame.K_DOWN:
-        velocidade_x = 0
-        velocidade_y = tamanho_quadrado
+        posicao_x = 0
+        posicao_y = pixel
 
     elif tecla == pygame.K_UP:
-        velocidade_x = 0
-        velocidade_y = -tamanho_quadrado
+        posicao_x = 0
+        posicao_y = -pixel
 
     elif tecla == pygame.K_RIGHT:
-        velocidade_x = tamanho_quadrado
-        velocidade_y = 0
+        posicao_x = pixel
+        posicao_y = 0
 
     elif tecla == pygame.K_LEFT:
-        velocidade_x = -tamanho_quadrado
-        velocidade_y = 0
+        posicao_x = -pixel
+        posicao_y = 0
 
-    return velocidade_x, velocidade_y
+    return posicao_x, posicao_y
 
-def rodar_jogo():
-    fim_jogo = False
-    x = largura / 2
-    y = altura / 2
-    velocidade_x = 0
-    velocidade_y = 0
-    tamanho_cobra = 1
-    pixels = []
-    comida_x, comida_y = gerar_comida()
+x = largura / 2
+y = altura / 2
+posicao_x = 0
+posicao_y = 0
+pontuacao = 1
+tamanho_cobra = []
+posicao_comida_x, posicao_comida_y = gerar_comida()
 
-    while not fim_jogo:
-        tela.fill(preta)
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                fim_jogo = True
+while True:
+    tela.fill(preta)
+    for evento in pygame.event.get():
+        if evento.type == pygame.QUIT:
+            exit()
 
-            elif evento.type == pygame.KEYDOWN:
-                velocidade_x, velocidade_y = selecionar_velocidade(evento.key)
+        elif evento.type == pygame.KEYDOWN:
+            posicao_x, posicao_y = mover_personagem(evento.key)
 
-        desenhar_comida(tamanho_quadrado, comida_x, comida_y)
+    desenhar_comida(pixel, posicao_comida_x, posicao_comida_y)
 
-        if x < 0 or x >= largura or y < 0 or y >= altura:
-            fim_jogo = True
+    if x < 0 or x >= largura or y < 0 or y >= altura:
+        exit()
 
-        x += velocidade_x
-        y += velocidade_y
+    x += posicao_x
+    y += posicao_y
 
-        pixels.append([x, y])
-        if len(pixels) > tamanho_cobra:
-            del pixels[0]
+    tamanho_cobra.append([x, y])
+    if len(tamanho_cobra) > pontuacao:
+        del tamanho_cobra[0]
 
-        for pixel in pixels[:-1]:
-            if pixel == [x, y]:
-                fim_jogo = True
+    for item in tamanho_cobra[:-1]:
+        if item == [x, y]:
+            exit()
 
-        desenhar_cobra(tamanho_quadrado, pixels)
-        
-        desenhar_pontuacao(tamanho_cobra - 1)
+    desenhar_cobra(pixel, tamanho_cobra)
+    
+    desenhar_pontuacao(pontuacao - 1)
 
-        pygame.display.update()
+    pygame.display.update()
 
-        if x == comida_x and y == comida_y:
-            tamanho_cobra += 1
-            comida_x, comida_y = gerar_comida()
+    if x == posicao_comida_x and y == posicao_comida_y:
+        pontuacao += 1
+        posicao_comida_x, posicao_comida_y = gerar_comida()
 
-        ticks.tick(velocidade_jogo)
-
-rodar_jogo()
+    ticks.tick(velocidade_jogo)
