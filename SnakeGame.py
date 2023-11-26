@@ -8,12 +8,20 @@ largura, altura = 1200, 800
 tela = pygame.display.set_mode((largura, altura))
 ticks = pygame.time.Clock()
 
-#* cores RGB
+#* cores RGB e Músicas
 
-preta = (0, 0, 0)
-branca = (255, 255, 255)
-vermelha = (255, 0, 0)
-verde = (0, 255, 0)
+som_comer = pygame.mixer.Sound('./music/comer.wav') # som precisa sem .wav
+som_perder = pygame.mixer.Sound('./music/perder.wav')
+pygame.mixer.music.set_volume(0.02)
+musica_de_fundo = pygame.mixer.music.load('./music/musica_de_fundo.mp3') #apenas musica de fundo é .mp3
+
+cor_fundo = (255,255, 255)
+cor_cobra = (0, 255, 0)
+cor_comida = (255, 0, 0)
+cor_texto = (0, 0, 0)
+
+pygame.mixer.music.play(-1)
+
 
 #* parametros da cobrinha
 
@@ -26,15 +34,15 @@ def gerar_comida():
     return posicao_comida_x, posicao_comida_y
 
 def desenhar_comida(pixel, posicao_comida_x, posicao_comida_y):
-    pygame.draw.rect(tela, verde, [posicao_comida_x, posicao_comida_y, pixel, pixel])
+    pygame.draw.rect(tela, cor_comida, [posicao_comida_x, posicao_comida_y, pixel, pixel])
 
 def desenhar_cobra(pixel, tamanho_cobra):
     for item in tamanho_cobra: 
-        pygame.draw.rect(tela, branca, [item[0], item[1], pixel, pixel])
+        pygame.draw.rect(tela, cor_cobra, [item[0], item[1], pixel, pixel])
 
 def desenhar_pontuacao(pontos):
     fonte = pygame.font.SysFont("Helvetica", 35)
-    texto = fonte.render(f"Pontos: {pontos}", True, vermelha)
+    texto = fonte.render(f"Pontos: {pontos}", True, cor_texto)
     tela.blit(texto, [1, 1])
 
 def mover_personagem(tecla):
@@ -65,7 +73,7 @@ tamanho_cobra = []
 posicao_comida_x, posicao_comida_y = gerar_comida()
 
 while True:
-    tela.fill(preta)
+    tela.fill(cor_fundo)
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
             exit()
@@ -76,6 +84,7 @@ while True:
     desenhar_comida(pixel, posicao_comida_x, posicao_comida_y)
 
     if x < 0 or x >= largura or y < 0 or y >= altura:
+        som_perder.play()
         exit()
 
     x += posicao_x
@@ -87,6 +96,7 @@ while True:
 
     for item in tamanho_cobra[:-1]:
         if item == [x, y]:
+            som_perder.play()
             exit()
 
     desenhar_cobra(pixel, tamanho_cobra)
@@ -98,5 +108,6 @@ while True:
     if x == posicao_comida_x and y == posicao_comida_y:
         pontuacao += 1
         posicao_comida_x, posicao_comida_y = gerar_comida()
+        som_comer.play()
 
     ticks.tick(velocidade_jogo)
